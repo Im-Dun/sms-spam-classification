@@ -253,3 +253,7 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+#data
+data/readme
+data/SMSSpamCollection
