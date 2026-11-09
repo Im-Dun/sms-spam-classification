@@ -48,6 +48,20 @@ Các mô hình so sánh:
 
 Dữ liệu được chia train/test có stratification. Vectorizer nằm trong `Pipeline`, vì vậy chỉ được fit trên tập train để tránh data leakage. Kết quả chưa được điền sẵn; hãy chạy thực nghiệm và báo cáo số liệu thực tế.
 
+### Dùng trực tiếp trong `train.py`
+
+`src.preprocessing.build_experiments()` nhận văn bản thô và trả về các pipeline BoW/TF-IDF:
+
+```python
+from src.preprocessing import build_experiments
+
+for name, pipeline in build_experiments().items():
+    pipeline.fit(X_train, y_train)  # X_train: nội dung SMS; y_train: ham/spam
+    predictions = pipeline.predict(X_test)
+```
+
+Tiền xử lý chỉ gộp khoảng trắng và chuyển chữ thường; tokenizer giữ URL, số, ký hiệu tiền tệ và dấu câu. BoW và TF-IDF dùng unigram/bigram, không lọc stopword và giữ cả từ hiếm (`min_df=1`). Vì tiền xử lý và vectorizer nằm trong pipeline, từ vựng chỉ được học từ dữ liệu truyền vào `fit()` (tập train).
+
 ## 4. EDA
 
 Mở `notebooks/eda.ipynb` bằng Jupyter hoặc VS Code. Nếu đường dẫn dữ liệu của bạn khác, sửa biến `DATA_DIR` trong notebook.
