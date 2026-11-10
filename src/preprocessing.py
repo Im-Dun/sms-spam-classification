@@ -6,6 +6,7 @@ from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
 from sklearn.naive_bayes import MultinomialNB
 from sklearn.linear_model import LogisticRegression
 from sklearn.pipeline import Pipeline
+from sklearn.svm import LinearSVC
 from sklearn.preprocessing import FunctionTransformer
 
 _SMS_TOKEN_PATTERN = re.compile(
@@ -47,7 +48,7 @@ def tokenize_sms(text: str) -> list[str]:
 
 def _make_text_pipeline(
     vectorizer: type[CountVectorizer] | type[TfidfVectorizer],
-    classifier: MultinomialNB | LogisticRegression,
+    classifier: MultinomialNB | LogisticRegression | LinearSVC,
 ) -> Pipeline:
     """Build a training-safe pipeline for raw SMS text."""
     return Pipeline([
@@ -75,5 +76,9 @@ def build_experiments(random_state: int = 42) -> dict[str, Pipeline]:
                 class_weight=None,
                 random_state=random_state,
             ),
+        ),
+        "tfidf_svm": _make_text_pipeline(
+            TfidfVectorizer,
+            LinearSVC(random_state=random_state),
         ),
     }

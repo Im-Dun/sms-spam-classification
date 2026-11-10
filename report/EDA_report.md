@@ -37,4 +37,4 @@ Bảng dưới đây mô tả số lượng và độ dài tin nhắn theo từn
 ![Biểu đồ độ dài tin nhắn](figures/message_length.png)
 
 ## 5. Kết luận
-Notebook EDA đã được chạy lại từ đầu đến cuối trên dataset gốc; toàn bộ 7 code cell hoàn tất không lỗi. Hai biểu đồ được tạo lại và lưu trong `report/figures/`. `load_dataset()` trả về đúng schema `label`, `text`, tương thích với yêu cầu đầu vào của pipeline huấn luyện. Tệp `src/train.py` không có trong workspace được kiểm tra nên việc gọi pipeline thực tế chưa thể xác nhận.
+Notebook EDA được cung cấp trong repository cùng hai biểu đồ phân phối nhãn và độ dài tin nhắn. Hàm `load_dataset()` trả về schema gồm hai cột `label`, `text`, tương thích với pipeline huấn luyện. Trước khi nộp, nhóm cần chạy lại notebook và đối chiếu số liệu, biểu đồ với phiên bản dataset thực tế được sử dụng.

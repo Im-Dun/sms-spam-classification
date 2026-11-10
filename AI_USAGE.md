@@ -1,10 +1,10 @@
-# AI Usage Declaration
+# Khai báo sử dụng công cụ AI
 
-> Chỉnh sửa nội dung này cho đúng với việc nhóm thực sự đã sử dụng AI. Không giữ lại tuyên bố nào chưa được nhóm kiểm chứng.
+Nhóm có sử dụng công cụ AI trong quá trình thực hiện bài tập lớn để hỗ trợ:
+- Tra cứu và giải thích khái niệm về tiền xử lý văn bản, biểu diễn BoW/TF-IDF và các chỉ số đánh giá.
+- Gợi ý cách tổ chức mã nguồn, kiểm tra lỗi và rà soát khả năng tích hợp giữa các module.
+- Hỗ trợ diễn đạt, rà soát cấu trúc tài liệu và giải thích kết quả thực nghiệm.
 
-Nhóm có sử dụng công cụ AI để hỗ trợ một số công việc trong quá trình thực hiện bài tập lớn, chẳng hạn như:
-- Gợi ý cấu trúc thư mục và cách tổ chức mã nguồn.
-- Hỗ trợ giải thích các bước xử lý văn bản, huấn luyện và đánh giá mô hình.
-- Hỗ trợ rà soát lỗi kỹ thuật và cải thiện cách trình bày tài liệu.
+AI chỉ đóng vai trò công cụ hỗ trợ. Các thành viên có trách nhiệm kiểm tra mã nguồn, tự chạy chương trình, xác minh số liệu, hiểu và có khả năng giải thích phần việc của mình. Kết quả đưa vào báo cáo phải được đối chiếu với lần chạy thực tế của nhóm.
 
-Nhóm đã/ sẽ kiểm tra lại mã nguồn, chạy thực nghiệm, xác minh các kết quả và chịu trách nhiệm về nội dung cuối cùng. Các chỉ số trong báo cáo phải lấy từ lần chạy thực tế của nhóm.
+**Nhóm cần rà soát và chỉnh sửa khai báo này để phản ánh đúng công cụ AI, phạm vi sử dụng và phần việc thực tế của từng thành viên trước khi nộp.**
