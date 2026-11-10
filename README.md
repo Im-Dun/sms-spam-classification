@@ -20,6 +20,7 @@ sms-spam-classification/
 │   └── tune_vectorizer.py # Thử nghiệm tham số vectorizer
 ├── .gitignore
 ├── AI_USAGE.md
+├── app.py                 # Giao diện phân loại SMS bằng Streamlit
 ├── README.md
 └── requirements.txt
 ```
@@ -69,6 +70,15 @@ Cài thư viện:
 ```bash
 python -m pip install --upgrade pip
 python -m pip install -r requirements.txt
+```
+
+### 4.1. Chạy giao diện web demo
+
+Sau khi đã có các mô hình được huấn luyện trong thư mục `models/`, chạy:
+
+```bash
+streamlit run app.py
+Ứng dụng sẽ mở trên trình duyệt tại `http://localhost:8501`.
 ```
 
 ## 5. Chạy chương trình
