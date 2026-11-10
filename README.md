@@ -12,12 +12,15 @@ sms-spam-classification/
 ├── report/               # Báo cáo EDA và hình EDA
 ├── results/              # Metrics, confusion matrix, lỗi dự đoán, artifacts
 ├── src/
+│   ├── __init__.py
 │   ├── data_loader.py    # Đọc và kiểm tra dữ liệu
 │   ├── preprocessing.py  # Chuẩn hóa, tokenization và pipeline
 │   ├── train.py          # Chia dữ liệu và huấn luyện mô hình
-│   └── evaluate.py       # Đánh giá và phân tích lỗi
+│   ├── evaluate.py       # Đánh giá và phân tích lỗi
+│   └── tune_vectorizer.py # Thử nghiệm tham số vectorizer
 ├── .gitignore
 ├── AI_USAGE.md
+├── README.md
 └── requirements.txt
 ```
 
@@ -50,11 +53,13 @@ python -m venv .venv
 Kích hoạt môi trường:
 
 Windows PowerShell:
+
 ```powershell
 .venv\Scripts\Activate.ps1
 ```
 
 macOS/Linux:
+
 ```bash
 source .venv/bin/activate
 ```
@@ -81,6 +86,7 @@ python -m src.train
 ```
 
 Chương trình:
+
 1. Đọc và kiểm tra dữ liệu.
 2. Loại bỏ bản ghi trùng hoàn toàn theo cặp nhãn/nội dung.
 3. Chia dữ liệu train/test theo tỷ lệ 80/20, stratify theo nhãn, `random_state=42`.
@@ -97,6 +103,7 @@ python -m src.evaluate
 ```
 
 Chương trình sử dụng predictions đã lưu, không huấn luyện lại. Kết quả gồm:
+
 - `results/metrics.csv`: Accuracy, Precision, Recall, F1-score và TN/FP/FN/TP.
 - `results/evaluation_summary.json`: kết quả dạng JSON.
 - `results/confusion_matrix_*.png`: confusion matrix từng mô hình.
@@ -105,7 +112,27 @@ Chương trình sử dụng predictions đã lưu, không huấn luyện lại. 
 
 Trong đánh giá nhị phân, `spam` được chọn là positive class.
 
+### 5.4. Thử nghiệm tham số vectorizer
+
+```bash
+python -m src.tune_vectorizer
+```
+
+Chương trình sử dụng cùng cách chia train/test với các thí nghiệm baseline và thử nghiệm 5 cấu hình Bag-of-Words kết hợp Multinomial Naive Bayes:
+
+| Cấu hình | `ngram_range` | `min_df` | `max_df` |
+|---|---|---:|---:|
+| Unigram | (1, 1) | 1 | 1.0 |
+| Unigram + Bigram | (1, 2) | 1 | 1.0 |
+| min_df = 2 | (1, 2) | 2 | 1.0 |
+| min_df = 3 | (1, 2) | 3 | 1.0 |
+| max_df = 0.95 | (1, 2) | 1 | 0.95 |
+
+Kết quả được lưu tại `results/vectorizer_experiments.json`.
+
 ## 6. Các phương án thực nghiệm
+
+### 6.1. So sánh mô hình
 
 | Phương án | Biểu diễn đặc trưng | Thuật toán |
 |---|---|---|
@@ -115,6 +142,22 @@ Trong đánh giá nhị phân, `spam` được chọn là positive class.
 | 4 | TF-IDF | LinearSVC |
 
 Các pipeline BoW và TF-IDF dùng cùng bước chuẩn hóa/tokenization, unigram và bigram. Vectorizer được fit bên trong pipeline trên tập train để hạn chế data leakage.
+
+### 6.2. So sánh tham số vectorizer
+
+Ngoài bốn mô hình baseline, nhóm thực hiện thêm thí nghiệm điều chỉnh tham số vectorizer trên mô hình Multinomial Naive Bayes.
+
+| Cấu hình | Accuracy | Precision | Recall | F1-score |
+|---|---:|---:|---:|---:|
+| Unigram | 98.74% | 96.83% | 93.13% | 94.94% |
+| Unigram + Bigram | 98.94% | 99.18% | 92.37% | 95.65% |
+| min_df = 2 | 98.94% | 98.39% | 93.13% | 95.69% |
+| min_df = 3 | 98.65% | 96.06% | 93.13% | 94.57% |
+| max_df = 0.95 | 98.94% | 99.18% | 92.37% | 95.65% |
+
+Cấu hình `ngram_range=(1, 2)`, `min_df=2`, `max_df=1.0` đạt F1-score cao nhất là 95.69%, nhỉnh hơn cấu hình baseline 95.65%.
+
+Kết quả cho thấy việc sử dụng unigram kết hợp bigram giúp cải thiện F1-score so với chỉ sử dụng unigram. Việc tăng `min_df` lên 3 làm giảm hiệu suất, có thể do một số đặc trưng hiếm nhưng hữu ích bị loại bỏ.
 
 ## 7. Kết quả thực nghiệm
 
@@ -129,7 +172,7 @@ Kết quả đánh giá trên tập test gồm 1.034 mẫu, sau khi thống nh�
 
 Trong bốn phương án, BoW kết hợp Multinomial Naive Bayes đạt F1-score cao nhất (95.65%), tiếp theo là TF-IDF kết hợp LinearSVC (94.07%).
 
-**Lưu ý**: Các kết quả được tạo từ lần chạy thực nghiệm mới nhất bằng src.train và src.evaluate. Nhãn spam được chọn làm positive class.
+**Lưu ý**: Các kết quả được tạo từ lần chạy thực nghiệm mới nhất bằng `src.train` và `src.evaluate`. Nhãn spam được chọn làm positive class.
 
 ## 8. Khai báo sử dụng AI
 
@@ -137,4 +180,4 @@ Nhóm khai báo việc sử dụng công cụ AI trong `AI_USAGE.md`. Các thàn
 
 ## 9. Ghi chú về kết quả và file sinh ra
 
-Các mô hình và file kết quả trong `models/` và `results/` có thể được tạo lại bằng hai lệnh huấn luyện và đánh giá ở trên. Không commit môi trường ảo, cache Python hoặc dataset gốc.
+Các mô hình và file kết quả trong `models/` và `results/` có thể được tạo lại bằng các lệnh huấn luyện, đánh giá và thử nghiệm vectorizer ở trên. Không commit môi trường ảo, cache Python hoặc dataset gốc.
