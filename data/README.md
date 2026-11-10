@@ -3,8 +3,16 @@
 Nguồn: UCI Machine Learning Repository – SMS Spam Collection  
 https://archive.ics.uci.edu/dataset/228/sms+spam+collection
 
-Tệp `SMSSpamCollection` là dữ liệu TSV, mỗi dòng gồm:
+Tệp `SMSSpamCollection` chứa các tin nhắn SMS được gán một trong hai nhãn:
 - `ham`: tin nhắn bình thường.
 - `spam`: tin nhắn rác.
 
-Tệp dữ liệu gốc đã được đặt sẵn trong thư mục này nên có thể chạy notebook ngay.
+# Hướng dẫn sử dụng
+
+Dataset gốc không được lưu trong repository. Người dùng cần tải dataset từ nguồn UCI, giải nén và đặt tệp SMSSpamCollection trực tiếp vào thư mục data/.
+
+Đường dẫn yêu cầu:
+
+data/SMSSpamCollection
+
+Sau khi đặt dữ liệu đúng vị trí, có thể chạy notebook EDA hoặc chương trình huấn luyện từ thư mục gốc repository.

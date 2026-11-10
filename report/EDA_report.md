@@ -37,4 +37,4 @@ Bảng dưới đây mô tả số lượng và độ dài tin nhắn theo từn
 ![Biểu đồ độ dài tin nhắn](figures/message_length.png)
 
 ## 5. Kết luận
-Notebook EDA được cung cấp trong repository cùng hai biểu đồ phân phối nhãn và độ dài tin nhắn. Hàm `load_dataset()` trả về schema gồm hai cột `label`, `text`, tương thích với pipeline huấn luyện. Trước khi nộp, nhóm cần chạy lại notebook và đối chiếu số liệu, biểu đồ với phiên bản dataset thực tế được sử dụng.
+Notebook EDA được cung cấp trong repository cùng hai biểu đồ phân phối nhãn và độ dài tin nhắn. Hàm `load_dataset()` trả về schema gồm hai cột `label`, `text`, tương thích với pipeline huấn luyện. Qua quá trình khám phá dữ liệu, bộ SMS Spam Collection sau làm sạch gồm 5.169 tin nhắn, không còn dữ liệu thiếu, nhãn không hợp lệ hoặc bản ghi trùng hoàn toàn. Tập dữ liệu có sự mất cân bằng giữa hai lớp ham và spam. Ngoài ra, tin nhắn spam có độ dài trung bình lớn hơn tin nhắn ham. Những đặc điểm này là cơ sở để lựa chọn phương pháp tiền xử lý và đánh giá các mô hình phân loại ở giai đoạn tiếp theo.
