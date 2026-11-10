@@ -1,6 +1,7 @@
-pandas
-numpy
-scikit-learn
-matplotlib
-seaborn
-jupyter
+# Supported runtime: Python 3.10+
+numpy>=1.24,<3
+pandas>=2.0,<3
+scikit-learn>=1.3,<2
+matplotlib>=3.7,<4
+jupyter>=1.0,<2
+joblib>=1.3,<2

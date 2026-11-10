@@ -1,0 +1,31 @@
+{
+    "data_summary": {
+        "total_samples": 5169,
+        "train_samples": 4135,
+        "test_samples": 1034,
+        "random_state": 42,
+        "test_size": 0.2,
+        "label_order": [
+            "ham",
+            "spam"
+        ]
+    },
+    "experiments": {
+        "bow_nb": {
+            "accuracy": 0.9893617021276596,
+            "train_time_seconds": 0.13850800000000163
+        },
+        "tfidf_nb": {
+            "accuracy": 0.937137330754352,
+            "train_time_seconds": 0.1844637000003786
+        },
+        "tfidf_logreg": {
+            "accuracy": 0.9632495164410058,
+            "train_time_seconds": 0.18863390000024083
+        },
+        "tfidf_svm": {
+            "accuracy": 0.9854932301740812,
+            "train_time_seconds": 0.14932430000044405
+        }
+    }
+}

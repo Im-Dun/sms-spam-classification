@@ -1,94 +1,110 @@
-"""Train and evaluate baseline and comparison models."""
+"""Train the SMS spam classification experiments and save reproducible artifacts."""
+import json
+import time
 from pathlib import Path
-import sys
 
-import matplotlib
-matplotlib.use("Agg")
-import matplotlib.pyplot as plt
-import pandas as pd
+import joblib
+from sklearn.metrics import accuracy_score
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import (
-    accuracy_score, precision_score, recall_score, f1_score,
-    confusion_matrix, ConfusionMatrixDisplay, classification_report,
-)
 
-try:
-    from .data_loader import load_dataset
-    from .preprocessing import build_experiments
-except ImportError:  # supports `python src/train.py`
-    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-    from src.data_loader import load_dataset
-    from src.preprocessing import build_experiments
+from src.data_loader import load_dataset
+from src.preprocessing import build_experiments
 
-ROOT = Path(__file__).resolve().parents[1]
-RESULTS_DIR = ROOT / "results"
+ROOT_DIR = Path(__file__).resolve().parents[1]
+MODELS_DIR = ROOT_DIR / "models"
+RESULTS_DIR = ROOT_DIR / "results"
+RANDOM_STATE = 42
+TEST_SIZE = 0.2
 
 
-def main():
-    RESULTS_DIR.mkdir(parents=True, exist_ok=True)
-    df = load_dataset()
+def run_training_pipeline(save_models=True):
+    """Train all experiment pipelines and optionally save models and predictions."""
+    print("=== [STEP 1] Load and prepare dataset ===")
+    df = load_dataset(ROOT_DIR / "data" / "SMSSpamCollection")
 
-    # Fixed hold-out split; stratify preserves the original class ratio.
+    X = df["text"]
+    y = df["label"]
+    total_samples = len(df)
+
     X_train, X_test, y_train, y_test = train_test_split(
-        df["text"],
-        df["label"],
-        test_size=0.20,
-        random_state=42,
-        stratify=df["label"],
+        X,
+        y,
+        test_size=TEST_SIZE,
+        stratify=y,
+        random_state=RANDOM_STATE,
+    )
+    print(
+        f"Samples: {total_samples} | Train: {len(X_train)} "
+        f"| Test: {len(X_test)}"
     )
 
-    metrics_rows = []
-    for name, model in build_experiments().items():
-        print(f"\n=== {name} ===")
-        model.fit(X_train, y_train)
-        predictions = model.predict(X_test)
+    experiments = build_experiments(random_state=RANDOM_STATE)
+    trained_models = {}
+    predictions = {}
+    metrics = {}
 
-        metrics_rows.append({
-            "experiment": name,
-            "accuracy": accuracy_score(y_test, predictions),
-            "spam_precision": precision_score(
-                y_test, predictions, pos_label="spam", zero_division=0
-            ),
-            "spam_recall": recall_score(
-                y_test, predictions, pos_label="spam", zero_division=0
-            ),
-            "spam_f1": f1_score(
-                y_test, predictions, pos_label="spam", zero_division=0
-            ),
-        })
+    print("\n=== [STEP 2] Train models ===")
+    for experiment_name, pipeline in experiments.items():
+        start_time = time.perf_counter()
+        pipeline.fit(X_train, y_train)
+        elapsed = time.perf_counter() - start_time
 
-        print(classification_report(
-            y_test, predictions, labels=["ham", "spam"], zero_division=0
-        ))
+        y_pred = pipeline.predict(X_test)
+        accuracy = accuracy_score(y_test, y_pred)
 
-        cm = confusion_matrix(y_test, predictions, labels=["ham", "spam"])
-        display = ConfusionMatrixDisplay(
-            confusion_matrix=cm, display_labels=["ham", "spam"]
-        )
-        display.plot(values_format="d", cmap="Blues")
-        plt.title(f"Confusion Matrix — {name}")
-        plt.tight_layout()
-        plt.savefig(RESULTS_DIR / f"confusion_matrix_{name}.png", dpi=160)
-        plt.close()
+        trained_models[experiment_name] = pipeline
+        predictions[experiment_name] = [str(value) for value in y_pred]
+        metrics[experiment_name] = {
+            "accuracy": float(accuracy),
+            "train_time_seconds": float(elapsed),
+        }
 
-        error_df = pd.DataFrame({
-            "text": X_test.reset_index(drop=True),
-            "true_label": y_test.reset_index(drop=True),
-            "predicted_label": pd.Series(predictions),
-        })
-        error_df = error_df[error_df["true_label"] != error_df["predicted_label"]]
-        error_df.to_csv(
-            RESULTS_DIR / f"misclassified_{name}.csv",
-            index=False,
-            encoding="utf-8-sig",
+        print(
+            f"{experiment_name:14s} | Accuracy: {accuracy:.4%} "
+            f"| Time: {elapsed:.4f}s"
         )
 
-    metrics = pd.DataFrame(metrics_rows)
-    metrics.to_csv(RESULTS_DIR / "metrics.csv", index=False, encoding="utf-8-sig")
-    print("\n=== Tổng hợp metrics ===")
-    print(metrics.to_string(index=False))
-    print(f"\nĐã lưu kết quả tại: {RESULTS_DIR}")
+    if save_models:
+        MODELS_DIR.mkdir(parents=True, exist_ok=True)
+        RESULTS_DIR.mkdir(parents=True, exist_ok=True)
+
+        for experiment_name, model in trained_models.items():
+            joblib.dump(model, MODELS_DIR / f"{experiment_name}.joblib")
+
+        # Store plain Python lists to avoid coupling the artifact to pandas extension dtypes.
+        artifacts = {
+            "X_test": [str(value) for value in X_test],
+            "y_test": [str(value) for value in y_test],
+            "predictions": predictions,
+        }
+        joblib.dump(artifacts, RESULTS_DIR / "predictions_and_test.joblib")
+
+        summary = {
+            "data_summary": {
+                "total_samples": int(total_samples),
+                "train_samples": int(len(X_train)),
+                "test_samples": int(len(X_test)),
+                "random_state": RANDOM_STATE,
+                "test_size": TEST_SIZE,
+                "label_order": ["ham", "spam"],
+            },
+            "experiments": metrics,
+        }
+        with (RESULTS_DIR / "training_summary.json").open(
+            "w", encoding="utf-8"
+        ) as file:
+            json.dump(summary, file, indent=4, ensure_ascii=False)
+
+        print(f"Models saved to: {MODELS_DIR}")
+        print(f"Training artifacts saved to: {RESULTS_DIR}")
+
+    return metrics, {
+        "models": trained_models,
+        "X_test": X_test,
+        "y_test": y_test,
+        "predictions": predictions,
+    }
 
 
 if __name__ == "__main__":
-    main()
+    run_training_pipeline(save_models=True)
